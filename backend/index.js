@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import clientRoutes from "./routes/clientRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
+import billRoutes from "./routes/billRoutes.js";
 
 connectDB();
 const app = express();
@@ -28,8 +29,9 @@ app.use("/auth", router);
 app.use("/products", productRouter);
 app.use("/client", clientRoutes);
 app.use("/category", categoryRoutes);
-
+app.use("/api/bill", billRoutes);
 app.use("/service", serviceRoutes);
+
 
 const PORT = process.env.PORT;
 
