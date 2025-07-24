@@ -4,6 +4,7 @@ import {
   getAllBills,
   getBillById,
   downloadBillPdf,
+  updateBillStatus,
 } from "../controllers/billController.js";
 import { ensureAuthenticated } from "../middlewares/productAuthMiddle.js";
 
@@ -13,5 +14,6 @@ router.post("/add", ensureAuthenticated, addBill);
 router.get("/all", ensureAuthenticated, getAllBills);
 router.get("/:id", ensureAuthenticated, getBillById);
 router.get("/pdf/:billId", ensureAuthenticated, downloadBillPdf);
+router.patch("/:id/status", ensureAuthenticated, updateBillStatus);
 
 export default router;

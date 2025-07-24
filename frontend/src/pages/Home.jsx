@@ -11,7 +11,6 @@ const Home = () => {
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth"));
 
-    // Fetch most recent categories
     axios
       .get("/category", {
         headers: { Authorization: auth?.jwtToken },
@@ -22,7 +21,6 @@ const Home = () => {
         }
       });
 
-    // Fetch most recent clients
     axios
       .get("/client", {
         headers: { Authorization: auth?.jwtToken },
@@ -33,7 +31,6 @@ const Home = () => {
         }
       });
 
-    // Fetch most recent services
     axios
       .get("/service", {
         headers: { Authorization: auth?.jwtToken },
@@ -46,59 +43,53 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         <Navbar />
-        <main className="flex-1 p-8 overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Recently Added Categories */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold mb-2 text-gray-700">
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+          <h1 className="text-4xl font-bold text-gray-800 mb-10">
+            Dashboard Overview
+          </h1>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Categories Card */}
+            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
                 Recently Added Categories
               </h2>
               {recentCategories.length > 0 ? (
-                <ul className="space-y-3">
-                  {recentCategories.map((cat, idx) => (
-                    <li key={cat._id} className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">
+                <ul className="space-y-4">
+                  {recentCategories.map((cat) => (
+                    <li key={cat._id} className="flex flex-col">
+                      <span className="text-base font-medium text-gray-800">
                         {cat.name}
                       </span>
-                      {idx === 0 && (
-                        <span className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
-                          New
-                        </span>
-                      )}
-                      <span className="ml-2 text-sm text-gray-500">
-                        {cat.description}
+                      <span className="text-sm text-gray-500">
+                        {cat.description || "No description"}
                       </span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400">No categories found.</p>
+                <p className="text-gray-400 text-sm mt-2">
+                  No categories found.
+                </p>
               )}
             </div>
 
-            {/* Recently Added Clients */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-semibold mb-2 text-gray-700">
+            {/* Clients Card */}
+            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
                 Recently Added Clients
               </h2>
               {recentClients.length > 0 ? (
-                <ul className="space-y-3">
-                  {recentClients.map((client, idx) => (
-                    <li key={client._id} className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-800">
-                          {client.name}
-                        </span>
-                        {idx === 0 && (
-                          <span className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
-                            New
-                          </span>
-                        )}
-                      </div>
+                <ul className="space-y-4">
+                  {recentClients.map((client) => (
+                    <li key={client._id} className="flex flex-col">
+                      <span className="text-base font-medium text-gray-800">
+                        {client.name}
+                      </span>
                       <span className="text-sm text-gray-500">
                         {client.email}
                       </span>
@@ -109,44 +100,37 @@ const Home = () => {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-400">No clients found.</p>
+                <p className="text-gray-400 text-sm mt-2">No clients found.</p>
               )}
             </div>
-          </div>
 
-          {/* Recently Added Services */}
-          <div className="mt-10 bg-white rounded-xl shadow p-6">
-            <h2 className="text-xl font-semibold mb-2 text-gray-700">
-              Recently Added Services
-            </h2>
-            {recentServices.length > 0 ? (
-              <ul className="space-y-3">
-                {recentServices.map((srv, idx) => (
-                  <li key={srv._id} className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">
+            {/* Services Card */}
+            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
+              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
+                Recently Added Services
+              </h2>
+              {recentServices.length > 0 ? (
+                <ul className="space-y-4">
+                  {recentServices.map((srv) => (
+                    <li key={srv._id} className="flex flex-col">
+                      <span className="text-base font-medium text-gray-800">
                         {srv.name}
                       </span>
-                      {idx === 0 && (
-                        <span className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-semibold">
-                          New
+                      <span className="text-sm text-gray-500">
+                        ₹{srv.price} - {srv.category?.name || "No Category"}
+                      </span>
+                      {srv.description && (
+                        <span className="text-sm text-gray-500">
+                          {srv.description}
                         </span>
                       )}
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      ₹{srv.price} - {srv.category?.name}
-                    </span>
-                    {srv.description && (
-                      <span className="text-sm text-gray-500">
-                        {srv.description}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-400">No services found.</p>
-            )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-400 text-sm mt-2">No services found.</p>
+              )}
+            </div>
           </div>
         </main>
       </div>

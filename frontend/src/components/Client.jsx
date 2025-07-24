@@ -6,6 +6,11 @@ import Navbar from "../components/Navbar";
 
 const Client = () => {
   const [clients, setClients] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const limit = 5; // entries per page
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,12 +26,16 @@ const Client = () => {
   // 🔃 Fetch all clients
   const fetchClients = async () => {
     try {
-      const { data } = await axios.get("/client", {
-        headers: {
-          Authorization: auth?.jwtToken,
-        },
-      });
+      const { data } = await axios.get(
+        `/client?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          search
+        )}`,
+        {
+          headers: { Authorization: auth?.jwtToken },
+        }
+      );
       setClients(data.clients);
+      setTotal(data.total);
     } catch (error) {
       toast.error("Error loading clients");
     }
@@ -34,7 +43,8 @@ const Client = () => {
 
   useEffect(() => {
     fetchClients();
-  }, []);
+    // eslint-disable-next-line
+  }, [page, search]);
 
   // 📝 Handle Input
   const handleChange = (e) =>
@@ -99,7 +109,7 @@ const Client = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />
@@ -170,9 +180,22 @@ const Client = () => {
               </button>
             </form>
 
-            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
-              Client List
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-700">
+                Client List
+              </h2>
+              <input
+                type="text"
+                placeholder="Search by name, email, or phone"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="px-3 py-2 border rounded focus:outline-none"
+                style={{ minWidth: 220 }}
+              />
+            </div>
             <div className="overflow-x-auto bg-white rounded-xl shadow">
               <table className="min-w-full text-left">
                 <thead className="bg-gray-100">
@@ -231,6 +254,27 @@ const Client = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span className="text-gray-700">
+                Page {page} of {Math.ceil(total / limit)}
+              </span>
+              <button
+                onClick={() =>
+                  setPage((prev) => (prev < total / limit ? prev + 1 : prev))
+                }
+                disabled={page >= total / limit}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+              >
+                Next
+              </button>
             </div>
           </div>
         </main>

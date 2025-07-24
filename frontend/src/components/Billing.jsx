@@ -12,19 +12,55 @@ const BillCreate = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedServices, setSelectedServices] = useState([]);
   const [status, setStatus] = useState("");
+  const [taxRate, setTaxRate] = useState(18);
 
   const fetchClients = async () => {
     try {
-      const { data } = await axios.get("/client", {
+      const { data } = await axios.get("/client?status=Active", {
         headers: {
           Authorization: JSON.parse(localStorage.getItem("auth"))?.jwtToken,
         },
       });
       setClients(data.clients);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load clients");
     }
   };
+
+  const fetchServices = async () => {
+    try {
+      const { data } = await axios.get("/service", {
+        headers: {
+          Authorization: JSON.parse(localStorage.getItem("auth"))?.jwtToken,
+        },
+      });
+      setServices(data.services);
+    } catch {
+      toast.error("Failed to load services");
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+    fetchServices();
+  }, []);
+
+  const handleAddService = () => {
+    if (!selectedService || quantity < 1) return;
+
+    if (selectedServices.find((s) => s.service === selectedService)) {
+      toast.error("Service already added");
+      return;
+    }
+
+    setSelectedServices([
+      ...selectedServices,
+      { service: selectedService, quantity: parseInt(quantity) },
+    ]);
+    setSelectedService("");
+    setQuantity(1);
+  };
+
   const downloadBill = async (billId) => {
     try {
       const response = await axios.get(
@@ -47,61 +83,33 @@ const BillCreate = () => {
       link.click();
 
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed", error);
+    } catch (err) {
       toast.error("PDF download failed");
     }
   };
 
-  const fetchServices = async () => {
-    try {
-      const { data } = await axios.get("/service", {
-        headers: {
-          Authorization: JSON.parse(localStorage.getItem("auth"))?.jwtToken,
-        },
-      });
-      setServices(data.services);
-    } catch (err) {
-      toast.error("Failed to load services");
-    }
-  };
-
-  useEffect(() => {
-    fetchClients();
-    fetchServices();
-  }, []);
-
-  const handleAddService = () => {
-    if (!selectedService || quantity < 1) return;
-    const exists = selectedServices.find((s) => s.service === selectedService);
-    if (exists) {
-      toast.error("Service already added");
-      return;
-    }
-
-    setSelectedServices([
-      ...selectedServices,
-      { service: selectedService, quantity: parseInt(quantity) },
-    ]);
-    setSelectedService("");
-    setQuantity(1);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!selectedClient || selectedServices.length === 0) {
       toast.error("Client and services are required");
       return;
     }
 
     try {
+      const subtotal = selectedServices.reduce((total, item) => {
+        const srv = services.find((s) => s._id === item.service);
+        return total + (srv?.price || 0) * item.quantity;
+      }, 0);
+      const taxAmount = (subtotal * taxRate) / 100;
+
       const { data } = await axios.post(
         "/api/bill/add",
         {
           client: selectedClient,
           services: selectedServices,
           status,
+          taxRate,
+          taxAmount,
         },
         {
           headers: {
@@ -111,144 +119,184 @@ const BillCreate = () => {
       );
 
       toast.success("Bill created successfully");
-
-      // Reset form
       setSelectedClient("");
       setSelectedServices([]);
-
-      // Automatically open PDF
       downloadBill(data.bill._id);
-    } catch (err) {
+    } catch {
       toast.error("Failed to create bill");
     }
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         <Navbar />
-        <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Create Bill</h1>
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white p-6 rounded-xl shadow space-y-6"
-          >
-            {/* Client dropdown */}
-            <div>
-              <label className="block text-gray-700 mb-1">Client</label>
-              <select
-                value={selectedClient}
-                onChange={(e) => setSelectedClient(e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded"
-              >
-                <option value="">Select Client</option>
-                {clients.map((client) => (
-                  <option key={client._id} value={client._id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Service selector */}
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <label className="block text-gray-700 mb-1">Service</label>
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
+              🧾 Create New Bill
+            </h1>
+            <form
+              onSubmit={handleSubmit}
+              className="bg-white rounded-2xl shadow-lg p-6 md:p-10 space-y-8 border"
+            >
+              {/* Client */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Client
+                </label>
                 <select
-                  value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full border border-gray-300 p-2 rounded"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                  className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-2 shadow-sm"
                 >
-                  <option value="">Select Service</option>
-                  {services.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} (₹{s.price})
-                    </option>
-                  ))}
+                  <option value="">-- Select Client --</option>
+                  {clients
+                    .filter((client) => client.status === "Active")
+                    .map((client) => (
+                      <option key={client._id} value={client._id}>
+                        {client.name}
+                      </option>
+                    ))}
                 </select>
               </div>
-              <div>
-                <label className="block text-gray-700 mb-1">Quantity</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="w-24 border border-gray-300 p-2 rounded"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleAddService}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Add
-              </button>
-            </div>
 
-            {/* Display selected services */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Selected Services
-              </h3>
-              {selectedServices.length === 0 && (
-                <p className="text-sm text-gray-500">No services added yet.</p>
-              )}
-              <ul className="space-y-2">
-                {selectedServices.map((item, idx) => {
-                  const srv = services.find((s) => s._id === item.service);
-                  return (
-                    <li
-                      key={idx}
-                      className="flex justify-between items-center border p-2 rounded"
-                    >
-                      <span>
-                        {srv?.name || "Unknown"} × {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSelectedServices(
-                            selectedServices.filter((_, i) => i !== idx)
-                          )
-                        }
-                        className="text-red-600 hover:underline text-sm"
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <label className="block mb-1">Bill Status</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="border rounded p-2 w-full"
-            >
-              <option value="">Select Status</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
-              <option value="Partially Paid">Partially Paid</option>
-            </select>
-            {selectedServices.length > 0 && (
-              <div className="text-right text-lg font-semibold text-gray-700">
-                Total: ₹
-                {selectedServices.reduce((total, item) => {
-                  const srv = services.find((s) => s._id === item.service);
-                  return total + (srv?.price || 0) * item.quantity;
-                }, 0)}
+              {/* Services */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Add Services
+                </label>
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                  <select
+                    value={selectedService}
+                    onChange={(e) => setSelectedService(e.target.value)}
+                    className="flex-1 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 px-4 py-2 shadow-sm"
+                  >
+                    <option value="">-- Select Service --</option>
+                    {services.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name} (₹{s.price})
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="w-24 rounded-lg border-gray-300 px-3 py-2 shadow-sm"
+                    placeholder="Qty"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddService}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-200 shadow"
+                  >
+                    ➕ Add
+                  </button>
+                </div>
               </div>
-            )}
-            <button
-              type="submit"
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-            >
-              Submit Bill
-            </button>
-          </form>
+
+              {/* Added Services List */}
+              {selectedServices.length > 0 && (
+                <div className="bg-gray-50 border rounded-lg p-5 space-y-3">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Added Services
+                  </h3>
+                  <ul className="divide-y divide-gray-200">
+                    {selectedServices.map((item, idx) => {
+                      const srv = services.find((s) => s._id === item.service);
+                      return (
+                        <li
+                          key={idx}
+                          className="flex justify-between items-center py-2"
+                        >
+                          <span className="text-gray-700">
+                            {srv?.name || "Unknown"} × {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedServices(
+                                selectedServices.filter((_, i) => i !== idx)
+                              )
+                            }
+                            className="text-red-500 hover:text-red-600 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {/* Status & GST */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Bill Status
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm focus:ring-blue-500"
+                  >
+                    <option value="">-- Select Status --</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Partially Paid">Partially Paid</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    GST Rate (%)
+                  </label>
+                  <input
+                    type="number"
+                    value={taxRate}
+                    onChange={(e) => setTaxRate(Number(e.target.value))}
+                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Total Display */}
+              {selectedServices.length > 0 &&
+                (() => {
+                  const subtotal = selectedServices.reduce((total, item) => {
+                    const srv = services.find((s) => s._id === item.service);
+                    return total + (srv?.price || 0) * item.quantity;
+                  }, 0);
+                  const gstAmount = (subtotal * taxRate) / 100;
+                  const total = subtotal + gstAmount;
+
+                  return (
+                    <div className="text-right pt-4 border-t border-gray-200">
+                      <div className="text-base text-gray-700">
+                        Subtotal: ₹{subtotal.toFixed(2)}
+                      </div>
+                      <div className="text-base text-gray-700">
+                        GST ({taxRate}%): ₹{gstAmount.toFixed(2)}
+                      </div>
+                      <div className="text-xl font-bold text-gray-800 mt-2">
+                        Total: ₹{total.toFixed(2)}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 transition duration-200 text-white py-3 rounded-lg font-semibold text-lg shadow"
+              >
+                ✅ Submit Bill
+              </button>
+            </form>
+          </div>
         </main>
       </div>
     </div>

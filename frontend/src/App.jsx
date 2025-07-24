@@ -10,6 +10,7 @@ import Client from "./components/Client";
 import Services from "./components/Services";
 import { Toaster } from "react-hot-toast";
 import Billing from "./components/Billing";
+import Invoices from "./components/Invoices";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/billing" element={<Billing />} />
 
           <Route path="/services" element={<Services />} />
+          <Route path="/invoices" element={<Invoices />} />
         </Route>
       </Routes>
     </>

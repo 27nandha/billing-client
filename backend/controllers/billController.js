@@ -2,12 +2,13 @@ import Bill from "../models/billModel.js";
 import { generateBillPdf } from "../utils/generateBillPdf.js";
 import Service from "../models/serviceModel.js";
 import Client from "../models/clientModel.js";
+import InvoiceCounter from "../models/invoiceCounterModel.js";
 
 // Add Bill
 
 export const addBill = async (req, res) => {
   try {
-    const { client, services, status } = req.body;
+    const { client, services, status, taxRate = 18, taxAmount } = req.body;
 
     if (!client || !services || services.length === 0) {
       return res
@@ -40,12 +41,40 @@ export const addBill = async (req, res) => {
       });
     }
 
+    // Calculate tax if not provided
+    const calculatedTaxAmount =
+      taxAmount !== undefined
+        ? taxAmount
+        : (totalAmount * (taxRate || 18)) / 100;
+
+    // Get current year (last 2 digits)
+    const now = new Date();
+    const year = now.getFullYear();
+    const yearShort = year.toString().slice(-2);
+
+    // Find or create counter for this year
+    let counter = await InvoiceCounter.findOne({ year });
+    if (!counter) {
+      counter = await InvoiceCounter.create({ year, seq: 1 });
+    } else {
+      counter.seq += 1;
+      await counter.save();
+    }
+
+    // Format the sequence as 3 digits, e.g., 001, 002
+    const seqStr = counter.seq.toString().padStart(3, "0");
+    const invoiceId = `RBS/${yearShort}/QT/${seqStr}`;
+
+    // Create the bill with the generated invoiceId
     const bill = new Bill({
       client,
       services: formattedServices,
-      totalAmount,
+      totalAmount: totalAmount + calculatedTaxAmount,
       createdBy: req.user._id,
-      status: status || "Unpaid", // use provided or default
+      status: status || "Unpaid",
+      taxRate: taxRate || 18,
+      taxAmount: calculatedTaxAmount,
+      invoiceId,
     });
 
     await bill.save();
@@ -64,12 +93,47 @@ export const addBill = async (req, res) => {
 // Get All Bills
 export const getAllBills = async (req, res) => {
   try {
-    const bills = await Bill.find({ createdBy: req.user._id })
-      .populate("client")
-      .populate("services.service")
-      .sort({ createdAt: -1 });
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const { search = "", status = "all" } = req.query;
 
-    res.status(200).json({ success: true, bills });
+    const query = { createdBy: req.user._id };
+
+    if (status !== "all") {
+      query.status = status;
+    }
+
+    if (search.trim() !== "") {
+      // Fix: search by client name via client IDs
+      const matchingClients = await Client.find({
+        name: { $regex: search, $options: "i" },
+      }).select("_id");
+      const clientIds = matchingClients.map((c) => c._id);
+
+      query.$or = [
+        { invoiceId: { $regex: search, $options: "i" } },
+        { client: { $in: clientIds } },
+      ];
+    }
+
+    const [bills, total] = await Promise.all([
+      Bill.find(query)
+        .populate("client")
+        .populate("services.service")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Bill.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      bills,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.error("Error fetching bills:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -122,5 +186,23 @@ export const downloadBillPdf = async (req, res) => {
     res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+export const updateBillStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const bill = await Bill.findById(id);
+    if (!bill) return res.status(404).json({ message: "Bill not found" });
+
+    bill.status = status;
+    await bill.save();
+
+    res.status(200).json({ message: "Status updated successfully" });
+  } catch (err) {
+    console.error("Error updating status:", err);
+    res.status(500).json({ message: "Server Error" });
   }
 };

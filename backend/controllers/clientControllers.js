@@ -29,12 +29,33 @@ export const addClient = async (req, res) => {
   }
 };
 
+// GET /client?page=1&limit=10
 export const getAllClients = async (req, res) => {
   try {
-    const clients = await Client.find().sort({ createdAt: -1 });
-    res.status(200).json({ success: true, clients });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching clients" });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const searchQuery = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { phone: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const clients = await Client.find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await Client.countDocuments(searchQuery);
+
+    res.status(200).json({ clients, total });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 

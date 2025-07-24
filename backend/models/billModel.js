@@ -36,6 +36,19 @@ const billSchema = new mongoose.Schema(
       enum: ["Paid", "Unpaid", "Partially Paid"],
       default: "Unpaid",
     },
+    taxRate: {
+      type: Number,
+      default: 18, // Default GST 18%
+    },
+    taxAmount: {
+      type: Number,
+      default: 0,
+    },
+    invoiceId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
   },
   {
     timestamps: true,
