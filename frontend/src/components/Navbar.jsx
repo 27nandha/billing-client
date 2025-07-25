@@ -5,6 +5,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { BsBoxFill } from "react-icons/bs";
 import { FaPowerOff } from "react-icons/fa6";
 
+
 const routeMap = {
   home: "/",
   category: "/category",
@@ -53,7 +54,7 @@ const Navbar = () => {
       <div className="w-full lg:w-auto text-center lg:text-left">
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 tracking-tight">
           Welcome back,{" "}
-          <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent font-extrabold">
+          <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent font-extrabold">
             {auth?.user || "Guest"}
           </span>
           <span className="text-gray-400 font-normal">!</span>
@@ -73,7 +74,7 @@ const Navbar = () => {
           />
           <input
             type="search"
-            placeholder="Search pages (Ctrl+/)"
+            placeholder="Search pages (search)"
             className="w-full ml-3 bg-transparent text-gray-700 placeholder-gray-400 text-sm font-medium focus:outline-none"
             value={search}
             onChange={(e) => {
@@ -106,7 +107,7 @@ const Navbar = () => {
         {/* Billing Button */}
         <button
           onClick={() => navigate("/billing")}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-semibold rounded-xl shadow-md hover:from-emerald-600 hover:to-teal-700 hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-black to-red-600 text-white text-sm font-semibold rounded-xl shadow-md hover:from-red-600 hover:to-black hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
         >
           <BsBoxFill className="text-base" />
           Billing
@@ -116,7 +117,7 @@ const Navbar = () => {
         <div className="relative group">
           <button
             onClick={handleLogout}
-            className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-r from-red-400 to-rose-500 text-white shadow-md hover:from-red-500 hover:to-rose-600 hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
+            className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-r from-red-400 to-red-800 text-white shadow-md hover:from-red-500 hover:to-rose-600 hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
           >
             <FaPowerOff className="text-base" />
           </button>

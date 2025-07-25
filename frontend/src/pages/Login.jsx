@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { use, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
@@ -13,6 +13,12 @@ const Login = () => {
   });
 
   const [auth, setAuth] = useAuth();
+
+  // Redirect if already logged in
+  if (auth && auth.user && auth.token) {
+    return <Navigate to="/" replace />;
+  }
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {

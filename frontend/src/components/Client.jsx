@@ -174,7 +174,7 @@ const Client = () => {
               </select>
               <button
                 type="submit"
-                className="col-span-1 md:col-span-2 bg-blue-600 hover:bg-blue-700 transition text-white px-6 py-3 rounded font-semibold mt-2"
+                className="col-span-1 md:col-span-2 bg-red-500 hover:bg-red-700 transition text-white px-6 py-3 rounded font-semibold mt-2"
               >
                 {editingId ? "Update Client" : "Add Client"}
               </button>

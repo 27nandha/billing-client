@@ -22,40 +22,40 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`p-5 mt-4 pt-2 shadow-lg ${
-        open ? "w-full md:w-60 h-screen" : "w-20 h-auto"
-      } relative duration-300`}
+      className={`transition-all duration-300 ${
+        open ? "w-full md:w-64" : "w-20"
+      } h-screen bg-white shadow-xl border-r border-gray-200 p-4 pt-3 relative`}
     >
       {/* Toggle Button */}
       <MdMenuOpen
-        className={`text-3xl absolute ${
-          open ? "right-3" : "-right-2 bg-white shadow-slate-600"
-        } top-3.5 cursor-pointer duration-300 ${!open && "rotate-180"}`}
+        className={`text-3xl absolute top-3 cursor-pointer text-gray-600 transition-transform ${
+          open ? "right-4" : "-right-3 bg-white rounded-full p-1 shadow"
+        } ${!open && "rotate-180"}`}
         onClick={() => setOpen(!open)}
       />
 
       {/* Logo */}
-      <div className="inline-flex items-center">
+      <div
+        className={`flex items-center ${
+          open ? "justify-start gap-3" : "justify-center"
+        } mb-6`}
+      >
         <TbCircleLetterRFilled
-          className={`text-customPurple mt-1 text-red-700 text-3xl cursor-pointer ml-1 mr-3 duration-500 ${
-            !open && "rotate-[360deg]"
-          }`}
+          className="text-red-700 text-3xl cursor-pointer transition-transform hover:scale-105"
           onClick={() => navigate("/")}
         />
-        <h1
-          className={`text-customh1 origin-left font-semibold text-2xl ${
-            !open && "scale-0"
-          }`}
-        >
-          Redback
-        </h1>
+        {open && (
+          <h1 className="text-gray-800 font-bold text-2xl tracking-wide">
+            Redback
+          </h1>
+        )}
       </div>
 
       {/* Menu List */}
       <ul className="space-y-2 text-sm font-medium text-gray-700">
         {/* Offerings */}
         <li
-          className="flex mt-2 items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
+          className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
           onClick={() => {
             if (!open) setOpen(true);
             setSubmenuOpen((prev) => !prev);

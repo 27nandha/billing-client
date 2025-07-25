@@ -54,15 +54,18 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Categories Card */}
-            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
-              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
-                Recently Added Categories
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
+                📦 Recently Added Categories
               </h2>
               {recentCategories.length > 0 ? (
                 <ul className="space-y-4">
                   {recentCategories.map((cat) => (
-                    <li key={cat._id} className="flex flex-col">
-                      <span className="text-base font-medium text-gray-800">
+                    <li
+                      key={cat._id}
+                      className="flex flex-col bg-gray-50/60 p-3 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      <span className="text-base font-semibold text-gray-700">
                         {cat.name}
                       </span>
                       <span className="text-sm text-gray-500">
@@ -79,15 +82,18 @@ const Home = () => {
             </div>
 
             {/* Clients Card */}
-            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
-              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
-                Recently Added Clients
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
+                👥 Recently Added Clients
               </h2>
               {recentClients.length > 0 ? (
                 <ul className="space-y-4">
                   {recentClients.map((client) => (
-                    <li key={client._id} className="flex flex-col">
-                      <span className="text-base font-medium text-gray-800">
+                    <li
+                      key={client._id}
+                      className="flex flex-col bg-gray-50/60 p-3 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      <span className="text-base font-semibold text-gray-700">
                         {client.name}
                       </span>
                       <span className="text-sm text-gray-500">
@@ -105,19 +111,22 @@ const Home = () => {
             </div>
 
             {/* Services Card */}
-            <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition">
-              <h2 className="text-lg font-semibold text-gray-700 mb-5 border-b pb-2">
-                Recently Added Services
+            <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+              <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
+                🛠️ Recently Added Services
               </h2>
               {recentServices.length > 0 ? (
                 <ul className="space-y-4">
                   {recentServices.map((srv) => (
-                    <li key={srv._id} className="flex flex-col">
-                      <span className="text-base font-medium text-gray-800">
+                    <li
+                      key={srv._id}
+                      className="flex flex-col bg-gray-50/60 p-3 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      <span className="text-base font-semibold text-gray-700">
                         {srv.name}
                       </span>
                       <span className="text-sm text-gray-500">
-                        ₹{srv.price} - {srv.category?.name || "No Category"}
+                        ₹{srv.price} • {srv.category?.name || "No Category"}
                       </span>
                       {srv.description && (
                         <span className="text-sm text-gray-500">

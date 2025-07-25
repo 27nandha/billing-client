@@ -14,6 +14,7 @@ const Services = () => {
     category: "",
   });
   const [editingServiceId, setEditingServiceId] = useState(null);
+  const [filteredCategory, setFilteredCategory] = useState("");
 
   // Fetch all services
   const fetchServices = async () => {
@@ -120,7 +121,7 @@ const Services = () => {
           <h1 className="text-3xl font-bold mb-8 text-gray-800">
             Manage Services
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {/* Form Card */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
@@ -133,9 +134,7 @@ const Services = () => {
                     type="text"
                     placeholder="Service Name"
                     value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
@@ -183,7 +182,7 @@ const Services = () => {
                 </div>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded w-full font-semibold"
+                  className="bg-red-500 hover:bg-red-700 transition text-white px-4 py-2 rounded w-full font-semibold"
                 >
                   {editingServiceId ? "Update Service" : "Add Service"}
                 </button>
@@ -191,7 +190,12 @@ const Services = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setForm({ name: "", description: "", price: "", category: "" });
+                      setForm({
+                        name: "",
+                        description: "",
+                        price: "",
+                        category: "",
+                      });
                       setEditingServiceId(null);
                     }}
                     className="mt-2 text-gray-500 hover:underline text-sm"
@@ -207,42 +211,68 @@ const Services = () => {
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 All Services
               </h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Filter by Category
+                </label>
+                <select
+                  value={filteredCategory}
+                  onChange={(e) => setFilteredCategory(e.target.value)}
+                  className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <ul className="space-y-4 max-h-[500px] overflow-y-auto">
                 {services.length === 0 && (
                   <li className="text-gray-500 text-center">
                     No services found.
                   </li>
                 )}
-                {services.map((srv) => (
-                  <li
-                    key={srv._id}
-                    className="flex justify-between items-center border border-gray-200 rounded-lg p-4 hover:shadow transition"
-                  >
-                    <div>
-                      <p className="font-semibold text-gray-800">{srv.name}</p>
-                      <p className="text-sm text-gray-500">
-                        ₹{srv.price} - {srv.category?.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {srv.description || "No description"}
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => handleEdit(srv)}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(srv._id)}
-                        className="text-red-600 hover:text-red-800 font-medium text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                {services
+                  .filter((srv) =>
+                    filteredCategory
+                      ? srv.category?._id === filteredCategory
+                      : true
+                  )
+                  .map((srv) => (
+                    <li
+                      key={srv._id}
+                      className="flex justify-between items-center border border-gray-200 rounded-lg p-4 hover:shadow transition"
+                    >
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {srv.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          ₹{srv.price} - {srv.category?.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {srv.description || "No description"}
+                        </p>
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEdit(srv)}
+                          className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(srv._id)}
+                          className="text-red-600 hover:text-red-800 font-medium text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>

@@ -61,7 +61,7 @@ const BillCreate = () => {
     setQuantity(1);
   };
 
-  const downloadBill = async (billId) => {
+  const printBill = async (billId) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/bill/pdf/${billId}`,
@@ -77,14 +77,18 @@ const BillCreate = () => {
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Invoice-${billId}.pdf`;
-      link.click();
-
-      window.URL.revokeObjectURL(url);
+      // Open PDF in a new tab and trigger print
+      const printWindow = window.open(url, "_blank");
+      if (printWindow) {
+        printWindow.onload = function () {
+          printWindow.focus();
+          printWindow.print();
+        };
+      } else {
+        toast.error("Popup blocked! Please allow popups for this site.");
+      }
     } catch (err) {
-      toast.error("PDF download failed");
+      toast.error("PDF print failed");
     }
   };
 
@@ -121,7 +125,8 @@ const BillCreate = () => {
       toast.success("Bill created successfully");
       setSelectedClient("");
       setSelectedServices([]);
-      downloadBill(data.bill._id);
+      // print instead of download
+      printBill(data.bill._id);
     } catch {
       toast.error("Failed to create bill");
     }
@@ -135,7 +140,7 @@ const BillCreate = () => {
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
-              🧾 Create New Bill
+              Create New Bill
             </h1>
             <form
               onSubmit={handleSubmit}
@@ -291,9 +296,9 @@ const BillCreate = () => {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 transition duration-200 text-white py-3 rounded-lg font-semibold text-lg shadow"
+                className="w-full bg-red-500 hover:bg-red-700 transition duration-200 text-white py-3 rounded-lg font-semibold text-lg shadow"
               >
-                ✅ Submit Bill
+                Submit Bill
               </button>
             </form>
           </div>

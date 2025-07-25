@@ -14,6 +14,7 @@ const Invoices = () => {
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false); // Add this
 
   const fetchBills = async () => {
     try {
@@ -42,8 +43,26 @@ const Invoices = () => {
     fetchBills();
   }, [page, searchTerm, statusFilter]);
 
-  const handleViewInvoice = (id) => {
-    window.open(`/api/bill/pdf/${id}`, "_blank");
+  const handleViewInvoice = async (id) => {
+    setPdfLoading(true); // Start loading
+    try {
+      const auth = JSON.parse(localStorage.getItem("auth"));
+      const response = await axios.get(`/api/bill/pdf/${id}`, {
+        responseType: "blob",
+        headers: {
+          Authorization: auth?.jwtToken,
+        },
+      });
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      // Optionally revoke the object URL after some time
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } catch {
+      toast.error("Failed to preview PDF");
+    } finally {
+      setPdfLoading(false); // Stop loading
+    }
   };
 
   const exportToCSV = () => {
@@ -89,6 +108,35 @@ const Invoices = () => {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
             <h1 className="text-3xl font-bold mb-6 text-gray-800">Invoices</h1>
+
+            {/* PDF Loading Spinner */}
+            {pdfLoading && (
+              <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded shadow flex flex-col items-center">
+                  <svg
+                    className="animate-spin h-8 w-8 text-blue-600 mb-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                  </svg>
+                  <span className="text-gray-700">Loading PDF preview...</span>
+                </div>
+              </div>
+            )}
 
             {/* 🔍 Search & Filter */}
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">

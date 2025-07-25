@@ -78,7 +78,7 @@ const Category = () => {
           </h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Add Category Form */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border">
+            <div className="bg-white rounded-2xl shadow-lg p-6 ">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Add New Category
               </h2>
@@ -92,7 +92,7 @@ const Category = () => {
                     placeholder="Enter category name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2  rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -103,13 +103,13 @@ const Category = () => {
                     placeholder="Enter description (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2  rounded-md shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows={4}
                   ></textarea>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded-md font-medium shadow-md"
+                  className="w-full bg-red-500 hover:bg-red-700 transition text-white py-2 rounded-md font-medium shadow-md"
                 >
                   + Add Category
                 </button>
@@ -117,7 +117,7 @@ const Category = () => {
             </div>
 
             {/* Categories List */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border">
+            <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 Existing Categories
               </h2>
