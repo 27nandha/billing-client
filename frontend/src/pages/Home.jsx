@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import axios from "axios";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const Home = () => {
   const [recentCategories, setRecentCategories] = useState([]);
   const [recentClients, setRecentClients] = useState([]);
   const [recentServices, setRecentServices] = useState([]);
+  const [invoiceStats, setInvoiceStats] = useState([]);
+  const [clientStats, setClientStats] = useState([]);
 
   useEffect(() => {
     const auth = JSON.parse(localStorage.getItem("auth"));
@@ -40,6 +51,15 @@ const Home = () => {
           setRecentServices(res.data.services.slice(0, 2));
         }
       });
+
+    axios
+      .get("/api/bill/stats", { headers: { Authorization: auth?.jwtToken } })
+      .then((res) => setInvoiceStats(res.data.stats));
+    axios
+      .get("/api/client/stats", {
+        headers: { Authorization: auth?.jwtToken },
+      })
+      .then((res) => setClientStats(res.data.stats));
   }, []);
 
   return (
@@ -56,7 +76,7 @@ const Home = () => {
             {/* Categories Card */}
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
               <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
-                📦 Recently Added Categories
+                Recently Added Categories
               </h2>
               {recentCategories.length > 0 ? (
                 <ul className="space-y-4">
@@ -84,7 +104,7 @@ const Home = () => {
             {/* Clients Card */}
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
               <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
-                👥 Recently Added Clients
+                Recently Added Clients
               </h2>
               {recentClients.length > 0 ? (
                 <ul className="space-y-4">
@@ -113,7 +133,7 @@ const Home = () => {
             {/* Services Card */}
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
               <h2 className="text-xl font-semibold text-gray-800 mb-5 border-b pb-2">
-                🛠️ Recently Added Services
+                Recently Added Services
               </h2>
               {recentServices.length > 0 ? (
                 <ul className="space-y-4">
@@ -141,6 +161,40 @@ const Home = () => {
               )}
             </div>
           </div>
+
+          {/* Invoice Stats Chart */}
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 mt-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Invoice Statistics
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={invoiceStats}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="_id" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="total" stroke="#8884d8" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Client Stats Chart */}
+          {/*
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-xl p-6 mt-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Client Statistics
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={clientStats}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="_id" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="#82ca9d" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          */}
         </main>
       </div>
     </div>

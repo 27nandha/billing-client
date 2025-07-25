@@ -121,13 +121,14 @@ const Services = () => {
           <h1 className="text-3xl font-bold mb-8 text-gray-800">
             Manage Services
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto px-4">
             {/* Form Card */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 {editingServiceId ? "Edit Service" : "Add New Service"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Name */}
                 <div>
                   <label className="block text-gray-600 mb-1">Name</label>
                   <input
@@ -135,9 +136,11 @@ const Services = () => {
                     placeholder="Service Name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
+
+                {/* Description */}
                 <div>
                   <label className="block text-gray-600 mb-1">
                     Description
@@ -148,9 +151,11 @@ const Services = () => {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  ></textarea>
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
+
+                {/* Price */}
                 <div>
                   <label className="block text-gray-600 mb-1">Price</label>
                   <input
@@ -160,9 +165,11 @@ const Services = () => {
                     onChange={(e) =>
                       setForm({ ...form, price: e.target.value })
                     }
-                    className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
+
+                {/* Category */}
                 <div>
                   <label className="block text-gray-600 mb-1">Category</label>
                   <select
@@ -170,7 +177,7 @@ const Services = () => {
                     onChange={(e) =>
                       setForm({ ...form, category: e.target.value })
                     }
-                    className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   >
                     <option value="">Select Category</option>
                     {categories.map((cat) => (
@@ -180,12 +187,16 @@ const Services = () => {
                     ))}
                   </select>
                 </div>
+
+                {/* Submit Button */}
                 <button
                   type="submit"
                   className="bg-red-500 hover:bg-red-700 transition text-white px-4 py-2 rounded w-full font-semibold"
                 >
                   {editingServiceId ? "Update Service" : "Add Service"}
                 </button>
+
+                {/* Cancel Edit */}
                 {editingServiceId && (
                   <button
                     type="button"
@@ -206,11 +217,13 @@ const Services = () => {
               </form>
             </div>
 
-            {/* List Card */}
+            {/* Services List */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">
                 All Services
               </h2>
+
+              {/* Filter by Category */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Filter by Category
@@ -218,7 +231,7 @@ const Services = () => {
                 <select
                   value={filteredCategory}
                   onChange={(e) => setFilteredCategory(e.target.value)}
-                  className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
                   <option value="">All Categories</option>
                   {categories.map((cat) => (
@@ -229,9 +242,10 @@ const Services = () => {
                 </select>
               </div>
 
-              <ul className="space-y-4 max-h-[500px] overflow-y-auto">
+              {/* Services List */}
+              <ul className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
                 {services.length === 0 && (
-                  <li className="text-gray-500 text-center">
+                  <li className="text-gray-500 text-center py-8">
                     No services found.
                   </li>
                 )}

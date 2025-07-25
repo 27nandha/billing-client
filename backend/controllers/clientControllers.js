@@ -91,3 +91,21 @@ export const updateClient = async (req, res) => {
     });
   }
 };
+
+// GET /client/stats
+export const getClientStats = async (req, res) => {
+  try {
+    const stats = await Client.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ stats: [] });
+  }
+};

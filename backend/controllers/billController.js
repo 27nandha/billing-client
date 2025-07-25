@@ -206,3 +206,37 @@ export const updateBillStatus = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+export const getInvoiceStats = async (req, res) => {
+  try {
+    const stats = await Bill.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ stats: [] });
+  }
+};
+
+export const getClientStats = async (req, res) => {
+  try {
+    const stats = await Client.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ stats: [] });
+  }
+};
