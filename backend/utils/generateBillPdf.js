@@ -1,19 +1,28 @@
 import PDFDocument from "pdfkit";
 
-export const generateBillPdf = (res, bill, client, servicesList) => {
+export const generateBillPdf = (
+  res,
+  bill,
+  client,
+  servicesList,
+  subcompany
+) => {
   const doc = new PDFDocument({ margin: 40 });
   doc.pipe(res);
 
-  // Company Header
+  // Subcompany Header
   doc
     .font("Helvetica-Bold")
     .fontSize(16)
-    .text("Redback IT Solutions Pvt Ltd.", { align: "center" })
+    .text(subcompany?.name || "Company Name", { align: "center" })
     .font("Helvetica")
     .fontSize(10)
-    .text("AL-24, THHB, Phase-3, Sathuvachari, Vellore-09", { align: "center" })
-    .text("Phone: 0416-2252688 | Cell: 8189985558", { align: "center" })
-    .text("Email: support@redbacks.in", { align: "center" });
+    .text(subcompany?.address || "", { align: "center" })
+    .text(
+      `GST: ${subcompany?.gstNumber || ""} | Phone: ${subcompany?.phone || ""}`,
+      { align: "center" }
+    )
+    .text(`Email: ${subcompany?.email || ""}`, { align: "center" });
 
   // Line below header
   doc.moveTo(40, 100).lineTo(570, 100).lineWidth(1).stroke();

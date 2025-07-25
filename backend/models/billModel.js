@@ -49,6 +49,11 @@ const billSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    subcompany: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subcompany",
+      required: true,
+    },
   },
   {
     timestamps: true,

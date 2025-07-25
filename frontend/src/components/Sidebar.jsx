@@ -14,6 +14,7 @@ import { RiBillFill } from "react-icons/ri";
 import { IoCash } from "react-icons/io5";
 import { BiSolidCategory } from "react-icons/bi";
 import { RiShoppingCartFill } from "react-icons/ri";
+import { MdOutlineDomainAdd } from "react-icons/md";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
@@ -134,6 +135,18 @@ const Sidebar = () => {
         >
           <RiBillFill className="text-xl text-red-500" />
           {open && <span className="text-gray-700">Invoice</span>}
+        </li>
+
+        {/* Subcompany */}
+        <li
+          className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
+          onClick={() => {
+            navigate("/subcompany");
+            if (window.innerWidth < 768) setOpen(false);
+          }}
+        >
+          <MdOutlineDomainAdd className="text-xl text-red-500" />
+          {open && <span className="text-gray-700">Add Company</span>}
         </li>
       </ul>
     </div>

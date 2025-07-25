@@ -13,6 +13,8 @@ const BillCreate = () => {
   const [selectedServices, setSelectedServices] = useState([]);
   const [status, setStatus] = useState("");
   const [taxRate, setTaxRate] = useState(18);
+  const [subcompanies, setSubcompanies] = useState([]);
+  const [selectedSubcompany, setSelectedSubcompany] = useState("");
 
   const fetchClients = async () => {
     try {
@@ -43,6 +45,9 @@ const BillCreate = () => {
   useEffect(() => {
     fetchClients();
     fetchServices();
+    axios
+      .get("/api/subcompany")
+      .then((res) => setSubcompanies(res.data.subcompanies));
   }, []);
 
   const handleAddService = () => {
@@ -94,8 +99,12 @@ const BillCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedClient || selectedServices.length === 0) {
-      toast.error("Client and services are required");
+    if (
+      !selectedClient ||
+      selectedServices.length === 0 ||
+      !selectedSubcompany
+    ) {
+      toast.error("Client, services, and subcompany are required");
       return;
     }
 
@@ -114,6 +123,7 @@ const BillCreate = () => {
           status,
           taxRate,
           taxAmount,
+          subcompany: selectedSubcompany, // <-- Add this line
         },
         {
           headers: {
@@ -125,7 +135,7 @@ const BillCreate = () => {
       toast.success("Bill created successfully");
       setSelectedClient("");
       setSelectedServices([]);
-      // print instead of download
+      setSelectedSubcompany(""); // Optionally reset
       printBill(data.bill._id);
     } catch {
       toast.error("Failed to create bill");
@@ -164,6 +174,25 @@ const BillCreate = () => {
                         {client.name}
                       </option>
                     ))}
+                </select>
+              </div>
+
+              {/* Subcompany */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">
+                  Subcompany
+                </label>
+                <select
+                  value={selectedSubcompany}
+                  onChange={(e) => setSelectedSubcompany(e.target.value)}
+                  className="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-2 shadow-sm"
+                >
+                  <option value="">-- Select Subcompany --</option>
+                  {subcompanies.map((sc) => (
+                    <option key={sc._id} value={sc._id}>
+                      {sc.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 

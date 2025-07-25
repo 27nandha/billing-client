@@ -8,7 +8,14 @@ import InvoiceCounter from "../models/invoiceCounterModel.js";
 
 export const addBill = async (req, res) => {
   try {
-    const { client, services, status, taxRate = 18, taxAmount } = req.body;
+    const {
+      client,
+      services,
+      status,
+      taxRate = 18,
+      taxAmount,
+      subcompany,
+    } = req.body;
 
     if (!client || !services || services.length === 0) {
       return res
@@ -75,6 +82,7 @@ export const addBill = async (req, res) => {
       taxRate: taxRate || 18,
       taxAmount: calculatedTaxAmount,
       invoiceId,
+      subcompany,
     });
 
     await bill.save();
@@ -121,6 +129,7 @@ export const getAllBills = async (req, res) => {
       Bill.find(query)
         .populate("client")
         .populate("services.service")
+        .populate("subcompany")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
@@ -143,19 +152,14 @@ export const getAllBills = async (req, res) => {
 // Get Single Bill
 export const getBillById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const bill = await Bill.findOne({ _id: id, createdBy: req.user._id })
+    const bill = await Bill.findById(req.params.id)
       .populate("client")
-      .populate("services.service");
-
-    if (!bill) {
-      return res.status(404).json({ message: "Bill not found" });
-    }
-
-    res.status(200).json({ success: true, bill });
+      .populate("services.service")
+      .populate("subcompany"); // <-- Add this
+    if (!bill) return res.status(404).json({ message: "Bill not found" });
+    res.json({ bill });
   } catch (error) {
-    console.error("Error fetching bill:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -164,7 +168,8 @@ export const downloadBillPdf = async (req, res) => {
     const { billId } = req.params;
     const bill = await Bill.findOne({ _id: billId, createdBy: req.user._id })
       .populate("client")
-      .populate("services.service");
+      .populate("services.service")
+      .populate("subcompany");
 
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
@@ -180,7 +185,10 @@ export const downloadBillPdf = async (req, res) => {
       `attachment; filename=Invoice-${billId}.pdf`
     );
 
-    generateBillPdf(res, bill, bill.client, servicesList);
+    const client = bill.client;
+    const subcompany = bill.subcompany;
+
+    generateBillPdf(res, bill, client, servicesList, subcompany);
   } catch (error) {
     console.error("Error generating PDF:", error); // This will show the real error
     res

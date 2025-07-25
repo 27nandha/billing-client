@@ -177,6 +177,7 @@ const Invoices = () => {
                     <tr className="bg-gray-100 text-left text-sm font-semibold text-gray-700">
                       <th className="p-3 border-b">Invoice #</th>
                       <th className="p-3 border-b">Client</th>
+                      <th className="p-3 border-b">Subcompany</th>
                       <th className="p-3 border-b">Date</th>
                       <th className="p-3 border-b">Status</th>
                       <th className="p-3 border-b">Total</th>
@@ -200,8 +201,12 @@ const Invoices = () => {
                             {highlight(bill.client?.name, searchTerm)}
                           </td>
                           <td className="p-3">
+                            {bill.subcompany?.name || "Redback"}
+                          </td>
+                          <td className="p-3">
                             {new Date(bill.createdAt).toLocaleDateString()}
                           </td>
+
                           <td className="p-3">
                             <select
                               value={bill.status}

@@ -10,6 +10,7 @@ import clientRoutes from "./routes/clientRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import billRoutes from "./routes/billRoutes.js";
+import subcompanyRoutes from "./routes/subcompanyRoutes.js";
 
 connectDB();
 const app = express();
@@ -31,7 +32,7 @@ app.use("/client", clientRoutes);
 app.use("/category", categoryRoutes);
 app.use("/api/bill", billRoutes);
 app.use("/service", serviceRoutes);
-
+app.use("/api/subcompany", subcompanyRoutes);
 
 const PORT = process.env.PORT;
 
