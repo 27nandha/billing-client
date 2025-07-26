@@ -15,7 +15,7 @@ import { IoCash } from "react-icons/io5";
 import { BiSolidCategory } from "react-icons/bi";
 import { RiShoppingCartFill } from "react-icons/ri";
 import { MdOutlineDomainAdd } from "react-icons/md";
-
+import { FaFileInvoice } from "react-icons/fa";
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const [submenuOpen, setSubmenuOpen] = useState(false);
@@ -147,6 +147,16 @@ const Sidebar = () => {
         >
           <MdOutlineDomainAdd className="text-xl text-red-500" />
           {open && <span className="text-gray-700">Add Company</span>}
+        </li>
+        <li
+          className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
+          onClick={() => {
+            navigate("/quotation");
+            if (window.innerWidth < 768) setOpen(false);
+          }}
+        >
+          <FaFileInvoice className="text-xl text-red-500" />
+          {open && <span className="text-gray-700">Quotation</span>}
         </li>
       </ul>
     </div>

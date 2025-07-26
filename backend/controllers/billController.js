@@ -15,6 +15,7 @@ export const addBill = async (req, res) => {
       taxRate = 18,
       taxAmount,
       subcompany,
+      type = "invoice",
     } = req.body;
 
     if (!client || !services || services.length === 0) {
@@ -60,17 +61,20 @@ export const addBill = async (req, res) => {
     const yearShort = year.toString().slice(-2);
 
     // Find or create counter for this year
-    let counter = await InvoiceCounter.findOne({ year });
+    // Separate counter per year and type (invoice or quotation)
+    let counter = await InvoiceCounter.findOne({ year, type });
+
     if (!counter) {
-      counter = await InvoiceCounter.create({ year, seq: 1 });
+      counter = await InvoiceCounter.create({ year, type, seq: 1 });
     } else {
       counter.seq += 1;
       await counter.save();
     }
 
-    // Format the sequence as 3 digits, e.g., 001, 002
+    // Format invoice/quotation number
     const seqStr = counter.seq.toString().padStart(3, "0");
-    const invoiceId = `RBS/${yearShort}/QT/${seqStr}`;
+    const prefix = type === "quotation" ? "QT" : "INV";
+    const invoiceId = `RBS/${yearShort}/${prefix}/${seqStr}`;
 
     // Create the bill with the generated invoiceId
     const bill = new Bill({
@@ -83,6 +87,7 @@ export const addBill = async (req, res) => {
       taxAmount: calculatedTaxAmount,
       invoiceId,
       subcompany,
+      type,
     });
 
     await bill.save();
@@ -104,19 +109,26 @@ export const getAllBills = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const { search = "", status = "all" } = req.query;
+    const { search = "", status = "all", type = "" } = req.query;
 
     const query = { createdBy: req.user._id };
 
+    // ✅ Add type filtering
+    if (type && ["invoice", "quotation"].includes(type)) {
+      query.type = type;
+    }
+
+    // ✅ Add status filter if not "all"
     if (status !== "all") {
       query.status = status;
     }
 
+    // ✅ Search by invoiceId or client name
     if (search.trim() !== "") {
-      // Fix: search by client name via client IDs
       const matchingClients = await Client.find({
         name: { $regex: search, $options: "i" },
       }).select("_id");
+
       const clientIds = matchingClients.map((c) => c._id);
 
       query.$or = [
@@ -180,9 +192,10 @@ export const downloadBillPdf = async (req, res) => {
     const servicesList = await Service.find({ _id: { $in: serviceIds } });
 
     res.setHeader("Content-Type", "application/pdf");
+    const fileType = bill.type === "quotation" ? "Quotation" : "Invoice";
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=Invoice-${billId}.pdf`
+      `attachment; filename=${fileType}-${billId}.pdf`
     );
 
     const client = bill.client;

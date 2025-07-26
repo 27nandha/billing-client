@@ -34,8 +34,15 @@ const billSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["Paid", "Unpaid", "Partially Paid"],
-      default: "Unpaid",
+      validate: {
+        validator: function (value) {
+          // Only validate if type is invoice
+          return this.type === "invoice" ? !!value : true;
+        },
+        message: "Status is required for invoices.",
+      },
     },
+
     taxRate: {
       type: Number,
       default: 18, // Default GST 18%
@@ -53,6 +60,11 @@ const billSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subcompany",
       required: true,
+    },
+    type: {
+      type: String,
+      enum: ["invoice", "quotation"],
+      default: "invoice",
     },
   },
   {

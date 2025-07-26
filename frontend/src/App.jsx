@@ -12,6 +12,7 @@ import { Toaster } from "react-hot-toast";
 import Billing from "./components/Billing";
 import Invoices from "./components/Invoices";
 import Subcompany from "./components/Subcompany";
+import Quotations from "./components/Quotation";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/subcompany" element={<Subcompany />} />
+          <Route path="/quotation" element={<Quotations />} />
         </Route>
       </Routes>
     </>

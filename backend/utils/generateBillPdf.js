@@ -10,7 +10,7 @@ export const generateBillPdf = (
   const doc = new PDFDocument({ margin: 40 });
   doc.pipe(res);
 
-  // Subcompany Header
+  // === Header Section ===
   doc
     .font("Helvetica-Bold")
     .fontSize(16)
@@ -19,39 +19,45 @@ export const generateBillPdf = (
     .fontSize(10)
     .text(subcompany?.address || "", { align: "center" })
     .text(
-      `GST: ${subcompany?.gstNumber || ""} | Phone: ${subcompany?.phone || ""}`,
+      `GST: ${subcompany?.gstNumber || "N/A"} | Phone: ${
+        subcompany?.phone || "N/A"
+      }`,
       { align: "center" }
     )
-    .text(`Email: ${subcompany?.email || ""}`, { align: "center" });
+    .text(`Email: ${subcompany?.email || "N/A"}`, { align: "center" });
 
-  // Line below header
-  doc.moveTo(40, 100).lineTo(570, 100).lineWidth(1).stroke();
+  doc.moveDown(1);
+  doc.moveTo(40, doc.y).lineTo(570, doc.y).stroke();
 
-  // INVOICE Title
-  doc.font("Helvetica-Bold").fontSize(14).text("INVOICE", 50, 110);
+  // === Invoice Title ===
+  const heading = bill.type === "quotation" ? "QUOTATION" : "INVOICE";
+  doc
+    .moveDown(1)
+    .font("Helvetica-Bold")
+    .fontSize(20)
+    .text(heading, { align: "center" });
 
-  // Client and Invoice Info (Side-by-Side)
-  const topY = 135;
+  // === Client & Invoice Info ===
+  const topY = doc.y + 20;
 
-  // Bill To
+  // Left Column - Bill To
   doc
     .font("Helvetica-Bold")
     .fontSize(10)
     .text("Bill To:", 50, topY)
     .font("Helvetica")
-    .fontSize(10)
     .text(client.name, 50, topY + 15)
     .text(client.email, 50, topY + 30)
     .text(client.phone, 50, topY + 45);
 
-  // Invoice Info
+  // Right Column - Invoice Info
   doc
     .font("Helvetica")
     .text(`Date: ${new Date(bill.createdAt).toLocaleDateString()}`, 370, topY)
     .text(`Invoice #: ${bill.invoiceId}`, 370, topY + 15)
     .text(`Status: ${bill.status}`, 370, topY + 30);
 
-  // Table Headers
+  // === Table Header ===
   const tableTop = topY + 80;
   const itemX = {
     sno: 50,
@@ -75,7 +81,7 @@ export const generateBillPdf = (
     .lineTo(550, tableTop + 15)
     .stroke();
 
-  // Table Rows
+  // === Table Rows ===
   let y = tableTop + 25;
   let subtotal = 0;
 
@@ -86,11 +92,11 @@ export const generateBillPdf = (
     const total = price * quantity;
     subtotal += total;
 
-    // Alternate background
+    // Alternate row color
     if (idx % 2 === 0) {
       doc
         .rect(50, y - 2, 500, 18)
-        .fill("#f9f9f9")
+        .fill("#f5f5f5")
         .fillColor("black");
     }
 
@@ -110,7 +116,7 @@ export const generateBillPdf = (
   doc.moveTo(50, y).lineTo(550, y).stroke();
   y += 10;
 
-  // Totals
+  // === Totals Section ===
   const taxRate = bill.taxRate || 18;
   const taxAmount = bill.taxAmount || (subtotal * taxRate) / 100;
   const grandTotal = subtotal + taxAmount;
@@ -133,33 +139,32 @@ export const generateBillPdf = (
     .text("Grand Total", itemX.unit, y)
     .text(`Rs.${grandTotal.toFixed(2)}`, itemX.total, y);
 
-  // Terms & Conditions
+  // === Terms & Conditions ===
   y += 40;
   doc.font("Helvetica-Bold").fontSize(9).text("Terms & Conditions:", 50, y);
 
   doc
     .font("Helvetica")
     .fontSize(9)
-    .text("1. Goods once sold cannot be taken back or exchanged.", 50, y + 15)
-    .text("2. Once invoice made, cannot be modified or cancelled.", 50, y + 27)
-    .text("3. Warranty must be claimed from manufacturer only.", 50, y + 39)
-    .text(
-      "4. Physical damage / burnt components / mishandling voids warranty.",
-      50,
-      y + 51
-    )
-    .text("5. Inclusive of all taxes.", 50, y + 63);
+    .list(
+      [
+        "Goods once sold cannot be taken back or exchanged.",
+        "Once invoice is made, it cannot be modified or cancelled.",
+        "Warranty must be claimed from manufacturer only.",
+        "Physical damage / burnt components / mishandling voids warranty.",
+        "Inclusive of all taxes.",
+      ],
+      60,
+      y + 15
+    );
 
-  // Signature
+  // === Signature Section ===
   doc
     .font("Helvetica")
     .fontSize(10)
     .text("Authorized Signature", 400, y + 100);
-  // .moveTo(400, y + 120)
-  // .lineTo(550, y + 120)
-  // .stroke();
 
-  // Footer
+  // === Footer Message ===
   doc
     .font("Helvetica-Bold")
     .fontSize(10)

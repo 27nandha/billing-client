@@ -15,6 +15,7 @@ const BillCreate = () => {
   const [taxRate, setTaxRate] = useState(18);
   const [subcompanies, setSubcompanies] = useState([]);
   const [selectedSubcompany, setSelectedSubcompany] = useState("");
+  const [type, setType] = useState("invoice");
 
   const fetchClients = async () => {
     try {
@@ -123,7 +124,8 @@ const BillCreate = () => {
           status,
           taxRate,
           taxAmount,
-          subcompany: selectedSubcompany, // <-- Add this line
+          subcompany: selectedSubcompany,
+          type, // <-- Add this line
         },
         {
           headers: {
@@ -284,6 +286,20 @@ const BillCreate = () => {
                     <option value="Partially Paid">Partially Paid</option>
                   </select>
                 </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Document Type
+                  </label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                  >
+                    <option value="invoice">Invoice</option>
+                    <option value="quotation">Quotation</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
                     GST Rate (%)

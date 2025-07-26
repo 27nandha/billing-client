@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 
 const PAGE_SIZE = 10;
 
-const Invoices = () => {
+const Invoices = ({ type = "invoice" }) => {
   const [bills, setBills] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -21,7 +21,7 @@ const Invoices = () => {
       setLoading(true);
       const auth = JSON.parse(localStorage.getItem("auth"));
       const { data } = await axios.get(
-        `/api/bill/all?search=${searchTerm}&status=${statusFilter}&page=${page}&limit=${PAGE_SIZE}`,
+        `/api/bill/all?search=${searchTerm}&status=${statusFilter}&type=${type}&page=${page}&limit=${PAGE_SIZE}`,
         {
           headers: {
             Authorization: auth?.jwtToken,
@@ -107,7 +107,9 @@ const Invoices = () => {
         <Navbar />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-6xl mx-auto bg-white rounded-lg shadow p-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Invoices</h1>
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
+              {type === "invoice" ? "Invoices" : "Quotations"}
+            </h1>
 
             {/* PDF Loading Spinner */}
             {pdfLoading && (
@@ -179,7 +181,9 @@ const Invoices = () => {
                       <th className="p-3 border-b">Client</th>
                       <th className="p-3 border-b">Subcompany</th>
                       <th className="p-3 border-b">Date</th>
-                      <th className="p-3 border-b">Status</th>
+                      {type === "invoice" && (
+                        <th className="p-3 border-b">Status</th>
+                      )}
                       <th className="p-3 border-b">Total</th>
                       <th className="p-3 border-b">PDF</th> {/* Add this */}
                     </tr>
@@ -206,39 +210,39 @@ const Invoices = () => {
                           <td className="p-3">
                             {new Date(bill.createdAt).toLocaleDateString()}
                           </td>
-
-                          <td className="p-3">
-                            <select
-                              value={bill.status}
-                              onChange={async (e) => {
-                                const newStatus = e.target.value;
-                                try {
-                                  const auth = JSON.parse(
-                                    localStorage.getItem("auth")
-                                  );
-                                  await axios.patch(
-                                    `/api/bill/${bill._id}/status`,
-                                    { status: newStatus },
-                                    {
-                                      headers: {
-                                        Authorization: auth?.jwtToken,
-                                      },
-                                    }
-                                  );
-                                  // Update status locally
-                                  setBills((prev) =>
-                                    prev.map((b) =>
-                                      b._id === bill._id
-                                        ? { ...b, status: newStatus }
-                                        : b
-                                    )
-                                  );
-                                  toast.success("Status updated");
-                                } catch {
-                                  toast.error("Failed to update status");
-                                }
-                              }}
-                              className={`px-2 py-1 rounded-full text-xs font-semibold
+                          {type === "invoice" && (
+                            <td className="p-3">
+                              <select
+                                value={bill.status}
+                                onChange={async (e) => {
+                                  const newStatus = e.target.value;
+                                  try {
+                                    const auth = JSON.parse(
+                                      localStorage.getItem("auth")
+                                    );
+                                    await axios.patch(
+                                      `/api/bill/${bill._id}/status`,
+                                      { status: newStatus },
+                                      {
+                                        headers: {
+                                          Authorization: auth?.jwtToken,
+                                        },
+                                      }
+                                    );
+                                    // Update status locally
+                                    setBills((prev) =>
+                                      prev.map((b) =>
+                                        b._id === bill._id
+                                          ? { ...b, status: newStatus }
+                                          : b
+                                      )
+                                    );
+                                    toast.success("Status updated");
+                                  } catch {
+                                    toast.error("Failed to update status");
+                                  }
+                                }}
+                                className={`px-2 py-1 rounded-full text-xs font-semibold
               ${
                 bill.status === "Paid"
                   ? "bg-green-100 text-green-700"
@@ -246,14 +250,16 @@ const Invoices = () => {
                   ? "bg-red-100 text-red-700"
                   : "bg-yellow-100 text-yellow-700"
               }`}
-                            >
-                              <option value="Paid">Paid</option>
-                              <option value="Unpaid">Unpaid</option>
-                              <option value="Partially Paid">
-                                Partially Paid
-                              </option>
-                            </select>
-                          </td>
+                              >
+                                <option value="Paid">Paid</option>
+                                <option value="Unpaid">Unpaid</option>
+                                <option value="Partially Paid">
+                                  Partially Paid
+                                </option>
+                              </select>
+                            </td>
+                          )}
+
                           <td className="p-3 font-medium">
                             ₹{bill.totalAmount.toFixed(2)}
                           </td>
