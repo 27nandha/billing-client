@@ -18,3 +18,23 @@ export const getSubcompanies = async (req, res) => {
     res.status(500).json({ subcompanies: [] });
   }
 };
+
+export const updateSubcompany = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Subcompany.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Subcompany not found" });
+    }
+
+    res.json({ success: true, subcompany: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

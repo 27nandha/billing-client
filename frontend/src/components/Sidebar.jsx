@@ -124,6 +124,17 @@ const Sidebar = () => {
           <IoCash className="text-xl text-red-500" />
           {open && <span className="text-gray-700">Billing</span>}
         </li>
+        {/* Subcompany */}
+        <li
+          className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
+          onClick={() => {
+            navigate("/subcompany");
+            if (window.innerWidth < 768) setOpen(false);
+          }}
+        >
+          <MdOutlineDomainAdd className="text-xl text-red-500" />
+          {open && <span className="text-gray-700">Add Company</span>}
+        </li>
 
         {/* Invoice */}
         <li
@@ -137,17 +148,6 @@ const Sidebar = () => {
           {open && <span className="text-gray-700">Invoice</span>}
         </li>
 
-        {/* Subcompany */}
-        <li
-          className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
-          onClick={() => {
-            navigate("/subcompany");
-            if (window.innerWidth < 768) setOpen(false);
-          }}
-        >
-          <MdOutlineDomainAdd className="text-xl text-red-500" />
-          {open && <span className="text-gray-700">Add Company</span>}
-        </li>
         <li
           className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 transition"
           onClick={() => {

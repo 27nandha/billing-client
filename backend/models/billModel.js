@@ -15,10 +15,18 @@ const billSchema = new mongoose.Schema(
           ref: "Service",
           required: true,
         },
+        name: {
+          type: String,
+          required: true,
+        },
         quantity: {
           type: Number,
           required: true,
           default: 1,
+        },
+        unitPrice: {
+          type: Number,
+          required: true,
         },
       },
     ],
@@ -36,16 +44,14 @@ const billSchema = new mongoose.Schema(
       enum: ["Paid", "Unpaid", "Partially Paid"],
       validate: {
         validator: function (value) {
-          // Only validate if type is invoice
           return this.type === "invoice" ? !!value : true;
         },
         message: "Status is required for invoices.",
       },
     },
-
     taxRate: {
       type: Number,
-      default: 18, // Default GST 18%
+      default: 18,
     },
     taxAmount: {
       type: Number,

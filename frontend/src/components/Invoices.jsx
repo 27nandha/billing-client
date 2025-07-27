@@ -305,11 +305,6 @@ const Invoices = ({ type = "invoice" }) => {
                           colSpan="6"
                           className="p-10 text-center text-gray-500"
                         >
-                          <img
-                            src="/empty.svg"
-                            alt="No results"
-                            className="mx-auto w-32 mb-2"
-                          />
                           No invoices match your filters.
                         </td>
                       </tr>

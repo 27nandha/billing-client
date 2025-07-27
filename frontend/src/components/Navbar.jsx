@@ -5,7 +5,6 @@ import { IoSearchOutline } from "react-icons/io5";
 import { BsBoxFill } from "react-icons/bs";
 import { FaPowerOff } from "react-icons/fa6";
 
-
 const routeMap = {
   home: "/",
   category: "/category",
@@ -14,6 +13,8 @@ const routeMap = {
   bill: "/billing",
   service: "/services",
   invoice: "/invoices",
+  addCompany: "/subcompany",
+  quotation: "/quotation",
 };
 
 const Navbar = () => {
@@ -69,7 +70,7 @@ const Navbar = () => {
           className="flex items-center px-4 py-2.5 rounded-2xl border border-gray-200 bg-white shadow-sm focus-within:ring-2 focus-within:ring-emerald-200/50 hover:shadow-md transition"
         >
           <IoSearchOutline
-            className="text-gray-500 text-xl cursor-pointer hover:text-emerald-600 transition"
+            className="text-gray-500 text-xl hidden md:block cursor-pointer hover:text-emerald-600 transition"
             onClick={handleSearch}
           />
           <input

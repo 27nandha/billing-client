@@ -61,51 +61,58 @@ export const generateBillPdf = (
   const tableTop = topY + 80;
   const itemX = {
     sno: 50,
-    name: 90,
-    qty: 300,
-    unit: 370,
-    total: 460,
+    name: 80,
+    description: 220,
+    qty: 370,
+    unit: 420,
+    total: 500,
   };
-
   doc
     .font("Helvetica-Bold")
     .fontSize(10)
     .text("S.No", itemX.sno, tableTop)
     .text("Item", itemX.name, tableTop)
+    .text("Description", itemX.description, tableTop)
     .text("Qty", itemX.qty, tableTop)
     .text("Unit Price", itemX.unit, tableTop)
     .text("Total", itemX.total, tableTop);
 
   doc
     .moveTo(50, tableTop + 15)
-    .lineTo(550, tableTop + 15)
+    .lineTo(570, tableTop + 15)
     .stroke();
 
   // === Table Rows ===
   let y = tableTop + 25;
   let subtotal = 0;
 
-  bill.services.forEach(({ service, quantity }, idx) => {
-    const serviceId = service._id?.toString() || service.toString();
-    const srv = servicesList.find((s) => s._id.toString() === serviceId);
-    const price = srv?.price || 0;
-    const total = price * quantity;
+  bill.services.forEach(({ service, quantity, unitPrice, name }, idx) => {
+    const qty = Number(quantity) || 0;
+    const price = Number(unitPrice) || 0;
+    const total = price * qty;
     subtotal += total;
+
+    const matchingService = servicesList.find(
+      (s) => s._id.toString() === (service._id || service).toString()
+    );
+    const description = matchingService?.description || "-";
 
     // Alternate row color
     if (idx % 2 === 0) {
-      doc
-        .rect(50, y - 2, 500, 18)
-        .fill("#f5f5f5")
-        .fillColor("black");
+      doc.fillColor("black");
     }
 
     doc
       .font("Helvetica")
-      .fontSize(10)
+      .fontSize(9)
       .fillColor("black")
       .text(idx + 1, itemX.sno, y)
-      .text(srv?.name || "Unknown", itemX.name, y)
+      .text(name || "Unknown", itemX.name, y, {
+        width: itemX.description - itemX.name - 5,
+      })
+      .text(description, itemX.description, y, {
+        width: itemX.qty - itemX.description - 5,
+      })
       .text(quantity.toString(), itemX.qty, y)
       .text(`Rs.${price.toFixed(2)}`, itemX.unit, y)
       .text(`Rs.${total.toFixed(2)}`, itemX.total, y);

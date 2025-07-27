@@ -33,27 +33,26 @@ export const addBill = async (req, res) => {
     let totalAmount = 0;
     const formattedServices = [];
 
-    for (let item of services) {
+    for (const item of services) {
       const service = await Service.findById(item.service);
-      if (!service) {
-        return res
-          .status(404)
-          .json({ message: "One or more services not found" });
-      }
-      const subtotal = service.price * item.quantity;
-      totalAmount += subtotal;
+      if (!service) continue;
+
+      const unitPrice = item.unitPrice ?? item.price ?? service.price;
+      const quantity = item.quantity ?? 1;
 
       formattedServices.push({
         service: service._id,
-        quantity: item.quantity,
+        name: item.name || service.name,
+        quantity,
+        unitPrice,
       });
+
+      totalAmount += quantity * unitPrice;
     }
 
     // Calculate tax if not provided
     const calculatedTaxAmount =
-      taxAmount !== undefined
-        ? taxAmount
-        : (totalAmount * (taxRate || 18)) / 100;
+      typeof taxAmount === "number" ? taxAmount : (totalAmount * taxRate) / 100;
 
     // Get current year (last 2 digits)
     const now = new Date();
@@ -201,7 +200,8 @@ export const downloadBillPdf = async (req, res) => {
     const client = bill.client;
     const subcompany = bill.subcompany;
 
-    generateBillPdf(res, bill, client, servicesList, subcompany);
+    const allServices = await Service.find({}); // fetch fresh data
+    generateBillPdf(res, bill, client, allServices, subcompany);
   } catch (error) {
     console.error("Error generating PDF:", error); // This will show the real error
     res

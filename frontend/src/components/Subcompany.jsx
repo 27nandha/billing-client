@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Sidebar from "./Sidebar";
@@ -13,6 +13,8 @@ const Subcompany = () => {
     email: "",
   });
   const [loading, setLoading] = useState(false);
+  const [subcompanies, setSubcompanies] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,8 +24,14 @@ const Subcompany = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("/api/subcompany/add", form);
-      toast.success("Subcompany added successfully");
+      if (editingId) {
+        await axios.put(`/api/subcompany/${editingId}`, form);
+        toast.success("Subcompany updated successfully");
+      } else {
+        await axios.post("/api/subcompany/add", form);
+        toast.success("Subcompany added successfully");
+      }
+
       setForm({
         name: "",
         address: "",
@@ -31,13 +39,47 @@ const Subcompany = () => {
         phone: "",
         email: "",
       });
+      setEditingId(null);
+      fetchSubcompanies(); // refresh list
     } catch {
-      toast.error("Failed to add subcompany");
+      toast.error("Failed to submit");
     } finally {
       setLoading(false);
     }
   };
+  const handleEdit = (sub) => {
+    setForm({
+      name: sub.name,
+      address: sub.address,
+      gstNumber: sub.gstNumber,
+      phone: sub.phone,
+      email: sub.email,
+    });
+    setEditingId(sub._id);
+  };
+  const handleCancelEdit = () => {
+    setForm({
+      name: "",
+      address: "",
+      gstNumber: "",
+      phone: "",
+      email: "",
+    });
+    setEditingId(null);
+  };
 
+  useEffect(() => {
+    fetchSubcompanies();
+  }, []);
+
+  const fetchSubcompanies = async () => {
+    try {
+      const res = await axios.get("/api/subcompany");
+      setSubcompanies(res.data.subcompanies);
+    } catch (err) {
+      toast.error("Failed to load subcompanies");
+    }
+  };
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <Sidebar />
@@ -123,15 +165,65 @@ const Subcompany = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none"
                 />
               </div>
+              {editingId && (
+                <button
+                  onClick={handleCancelEdit}
+                  className="mb-4 text-sm text-blue-600 underline"
+                >
+                  Cancel Edit
+                </button>
+              )}
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 disabled:opacity-60 transition-all duration-200"
               >
-                {loading ? "Adding..." : "Add Subcompany"}
+                {loading
+                  ? editingId
+                    ? "Updating..."
+                    : "Adding..."
+                  : editingId
+                  ? "Update Subcompany"
+                  : "Add Subcompany"}
               </button>
             </form>
+
+            <h3 className="text-xl font-semibold mt-10 mb-4 text-gray-700">
+              All Subcompanies
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border text-sm">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="p-2">Name</th>
+                    <th className="p-2">Email</th>
+                    <th className="p-2">Phone</th>
+                    <th className="p-2">GST</th>
+                    <th className="p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subcompanies.map((sub) => (
+                    <tr key={sub._id} className="border-b">
+                      <td className="p-2">{sub.name}</td>
+                      <td className="p-2">{sub.email}</td>
+                      <td className="p-2">{sub.phone}</td>
+                      <td className="p-2">{sub.gstNumber}</td>
+                      <td className="p-2">
+                        <button
+                          onClick={() => handleEdit(sub)}
+                          className="text-blue-600 hover:underline text-sm"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </main>
       </div>
