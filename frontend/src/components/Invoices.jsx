@@ -305,7 +305,9 @@ const Invoices = ({ type = "invoice" }) => {
                           colSpan="6"
                           className="p-10 text-center text-gray-500"
                         >
-                          No invoices match your filters.
+                          {type === "invoice"
+                            ? "No invoices match your filters."
+                            : "No quotations match your filters."}
                         </td>
                       </tr>
                     )}

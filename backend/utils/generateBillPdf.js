@@ -125,8 +125,15 @@ export const generateBillPdf = (
   y += 10;
 
   // === Totals Section ===
-  const taxRate = bill.taxRate || 18;
-  const taxAmount = bill.taxAmount || (subtotal * taxRate) / 100;
+  const sgst = bill.sgstRate || 0;
+  const cgst = bill.cgstRate || 0;
+  const igst = bill.igstRate || 0;
+
+  const sgstAmount = bill.sgstAmount || (subtotal * sgst) / 100;
+  const cgstAmount = bill.cgstAmount || (subtotal * cgst) / 100;
+  const igstAmount = bill.igstAmount || (subtotal * igst) / 100;
+
+  const taxAmount = sgstAmount + cgstAmount + igstAmount;
   const grandTotal = subtotal + taxAmount;
 
   doc
@@ -135,12 +142,28 @@ export const generateBillPdf = (
     .text(`Rs.${subtotal.toFixed(2)}`, itemX.total, y);
 
   y += 15;
+
+  // Always show SGST
   doc
     .font("Helvetica")
-    .text(`GST (${taxRate}%)`, itemX.unit, y)
-    .text(`Rs.${taxAmount.toFixed(2)}`, itemX.total, y);
-
+    .text(`SGST (${sgst}%)`, itemX.unit, y)
+    .text(`Rs.${sgst > 0 ? sgstAmount.toFixed(2) : "0.00"}`, itemX.total, y);
   y += 15;
+
+  // Always show CGST
+  doc
+    .font("Helvetica")
+    .text(`CGST (${cgst}%)`, itemX.unit, y)
+    .text(`Rs.${cgst > 0 ? cgstAmount.toFixed(2) : "0.00"}`, itemX.total, y);
+  y += 15;
+
+  // Always show IGST
+  doc
+    .font("Helvetica")
+    .text(`IGST (${igst}%)`, itemX.unit, y)
+    .text(`Rs.${igst > 0 ? igstAmount.toFixed(2) : "0.00"}`, itemX.total, y);
+  y += 15;
+
   doc
     .font("Helvetica-Bold")
     .fontSize(11)

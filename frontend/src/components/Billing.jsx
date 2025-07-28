@@ -31,6 +31,9 @@ const BillCreate = () => {
     email: "",
     phone: "",
   });
+  const [sgst, setSgst] = useState(9);
+  const [cgst, setCgst] = useState(9);
+  const [igst, setIgst] = useState(0);
 
   const fetchClients = async () => {
     try {
@@ -76,6 +79,26 @@ const BillCreate = () => {
       .catch(() => toast.error("Failed to load categories"));
   }, []);
 
+  useEffect(() => {
+    if (selectedClient && selectedSubcompany) {
+      const clientObj = clients.find((c) => c._id === selectedClient);
+      const subcompanyObj = subcompanies.find(
+        (s) => s._id === selectedSubcompany
+      );
+
+      if (clientObj && subcompanyObj) {
+        if (clientObj.state === subcompanyObj.state) {
+          setSgst(9);
+          setCgst(9);
+          setIgst(0);
+        } else {
+          setSgst(0);
+          setCgst(0);
+          setIgst(18);
+        }
+      }
+    }
+  }, [selectedClient, selectedSubcompany, clients, subcompanies]);
   const handleAddService = () => {
     if (!selectedService || quantity < 1) return;
 
@@ -148,7 +171,7 @@ const BillCreate = () => {
         (total, item) => total + item.price * item.quantity,
         0
       );
-
+      const taxType = igst > 0 ? "IGST" : "CGST_SGST";
       const taxAmount = (subtotal * taxRate) / 100;
       const finalServices = selectedServices.map((item) => {
         const srv = services.find((s) => s._id === item.service);
@@ -166,11 +189,14 @@ const BillCreate = () => {
           client: selectedClient,
           services: finalServices,
           status: type === "invoice" ? status : undefined,
-          totalAmount: subtotal + taxAmount,
           subcompany: selectedSubcompany,
           type,
           taxRate,
           taxAmount,
+          cgstRate: cgst,
+          sgstRate: sgst,
+          igstRate: igst,
+          taxType, // <-- important!
         },
         {
           headers: {
@@ -207,7 +233,12 @@ const BillCreate = () => {
     value: cat._id, // or cat.name based on your schema
     label: cat.name,
   }));
-
+  const subtotal = selectedServices.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+  const gstAmount = (subtotal * taxRate) / 100;
+  const totalAmount = subtotal + gstAmount;
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
       <Sidebar />
@@ -229,10 +260,16 @@ const BillCreate = () => {
                 </label>
                 <Select
                   options={clientOptions}
-                  value={clientOptions.find(
-                    (opt) => opt.value === selectedClient
-                  )}
-                  onChange={(selected) => setSelectedClient(selected?.value)}
+                  value={
+                    selectedClient
+                      ? clientOptions.find(
+                          (opt) => opt.value === selectedClient
+                        )
+                      : null
+                  }
+                  onChange={(selected) =>
+                    setSelectedClient(selected?.value || "")
+                  }
                   className="flex-1"
                   placeholder="Select Client"
                   isSearchable
@@ -242,8 +279,8 @@ const BillCreate = () => {
                       borderRadius: "0.5rem",
                       padding: "2px",
                       boxShadow: "none",
-                      borderColor: "#d1d5db", // Tailwind border-gray-300
-                      "&:hover": { borderColor: "#3b82f6" }, // Tailwind blue-500
+                      borderColor: "#d1d5db",
+                      "&:hover": { borderColor: "#3b82f6" },
                     }),
                   }}
                 />
@@ -655,11 +692,98 @@ const BillCreate = () => {
                     GST Rate (%)
                   </label>
                   <input
-                    type="number"
-                    value={taxRate}
-                    onChange={(e) => setTaxRate(Number(e.target.value))}
-                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                    type="text"
+                    readOnly
+                    value={igst > 0 ? `${igst}` : `${cgst + sgst}`}
+                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm bg-gray-100"
                   />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    GST Type
+                  </label>
+                  <select
+                    value={igst > 0 ? "IGST" : "CGST_SGST"}
+                    onChange={(e) => {
+                      if (e.target.value === "IGST") {
+                        setIgst(18);
+                        setCgst(0);
+                        setSgst(0);
+                      } else {
+                        setIgst(0);
+                        setCgst(9);
+                        setSgst(9);
+                      }
+                    }}
+                    className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                  >
+                    <option value="CGST_SGST">CGST/SGST</option>
+                    <option value="IGST">IGST</option>
+                  </select>
+                </div>
+                {igst === 0 && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        CGST Rate (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={cgst}
+                        onChange={(e) => setCgst(Number(e.target.value))}
+                        className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        SGST Rate (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={sgst}
+                        onChange={(e) => setSgst(Number(e.target.value))}
+                        className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                      />
+                    </div>
+                  </>
+                )}
+                {igst > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      IGST Rate (%)
+                    </label>
+                    <input
+                      type="number"
+                      value={igst}
+                      onChange={(e) => setIgst(Number(e.target.value))}
+                      className="w-full rounded-lg border-gray-300 px-4 py-2 shadow-sm"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 space-y-1 text-sm text-gray-700">
+                {sgst > 0 && (
+                  <div className="flex justify-between">
+                    <span>SGST ({sgst}%)</span>
+                    <span>Rs. {((subtotal * sgst) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {cgst > 0 && (
+                  <div className="flex justify-between">
+                    <span>CGST ({cgst}%)</span>
+                    <span>Rs. {((subtotal * cgst) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                {igst > 0 && (
+                  <div className="flex justify-between">
+                    <span>IGST ({igst}%)</span>
+                    <span>Rs. {((subtotal * igst) / 100).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>Rs. {totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 

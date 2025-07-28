@@ -19,7 +19,10 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // ✅ Your frontend origin (Vite default)
+    origin: [
+      "https://billing-client-git-main-27nandhas-projects.vercel.app",
+      "http://localhost:3000",
+    ], // ✅ Your frontend origin (Vite default)
     credentials: true, // ✅ Allow cookies to be sent
   })
 );
@@ -33,7 +36,7 @@ app.use("/category", categoryRoutes);
 app.use("/api/bill", billRoutes);
 app.use("/service", serviceRoutes);
 app.use("/api/subcompany", subcompanyRoutes);
-app.use("/api/bank", bankRoutes); 
+app.use("/api/bank", bankRoutes);
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {

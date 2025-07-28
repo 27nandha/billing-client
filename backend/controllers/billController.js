@@ -15,6 +15,13 @@ export const addBill = async (req, res) => {
       status,
       taxRate = 18,
       taxAmount,
+      cgstRate = 0,
+      cgstAmount,
+      sgstRate = 0,
+      sgstAmount,
+      igstRate = 0,
+      igstAmount,
+      taxType = "CGST_SGST", // <- important
       subcompany,
       type = "invoice",
     } = req.body;
@@ -52,8 +59,30 @@ export const addBill = async (req, res) => {
     }
 
     // Calculate tax if not provided
-    const calculatedTaxAmount =
-      typeof taxAmount === "number" ? taxAmount : (totalAmount * taxRate) / 100;
+    let calculatedCgstAmount = 0;
+    let calculatedSgstAmount = 0;
+    let calculatedIgstAmount = 0;
+    let calculatedTaxAmount = 0;
+
+    if (taxType === "IGST") {
+      calculatedIgstAmount =
+        typeof igstAmount === "number"
+          ? igstAmount
+          : (totalAmount * (igstRate || taxRate)) / 100;
+      calculatedTaxAmount = calculatedIgstAmount;
+    } else {
+      calculatedCgstAmount =
+        typeof cgstAmount === "number"
+          ? cgstAmount
+          : (totalAmount * (cgstRate || taxRate / 2)) / 100;
+      calculatedSgstAmount =
+        typeof sgstAmount === "number"
+          ? sgstAmount
+          : (totalAmount * (sgstRate || taxRate / 2)) / 100;
+      calculatedTaxAmount = calculatedCgstAmount + calculatedSgstAmount;
+    }
+
+    const grandTotal = totalAmount + calculatedTaxAmount;
 
     // Get current year (last 2 digits)
     const now = new Date();
@@ -80,7 +109,13 @@ export const addBill = async (req, res) => {
     const bill = new Bill({
       client,
       services: formattedServices,
-      totalAmount: totalAmount + calculatedTaxAmount,
+      totalAmount: grandTotal,
+      cgstRate,
+      cgstAmount: calculatedCgstAmount,
+      sgstRate, // <-- ADD THIS
+      sgstAmount: calculatedSgstAmount, // <-- ADD THIS
+      igstRate,
+      igstAmount: calculatedIgstAmount,
       createdBy: req.user._id,
       status: status || "Unpaid",
       taxRate: taxRate || 18,
@@ -88,6 +123,7 @@ export const addBill = async (req, res) => {
       invoiceId,
       subcompany,
       type,
+      taxType,
     });
 
     await bill.save();

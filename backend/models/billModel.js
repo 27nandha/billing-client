@@ -49,6 +49,17 @@ const billSchema = new mongoose.Schema(
         message: "Status is required for invoices.",
       },
     },
+    taxType: {
+      type: String,
+      enum: ["IGST", "CGST_SGST"],
+      required: true,
+    },
+    cgstRate: { type: Number, default: 0 },
+    sgstRate: { type: Number, default: 0 },
+    igstRate: { type: Number, default: 0 },
+    cgstAmount: { type: Number, default: 0 },
+    sgstAmount: { type: Number, default: 0 },
+    igstAmount: { type: Number, default: 0 },
     taxRate: {
       type: Number,
       default: 18,
