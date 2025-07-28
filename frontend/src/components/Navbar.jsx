@@ -104,26 +104,25 @@ const Navbar = () => {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Billing Button */}
         <button
           onClick={() => navigate("/billing")}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-black to-red-600 text-white text-sm font-semibold rounded-xl shadow-md hover:from-red-600 hover:to-black hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
+          className="flex items-center gap-2 px-4 py-2 h-11 bg-gradient-to-r from-black to-red-600 text-white text-sm font-semibold rounded-xl shadow-md hover:from-red-600 hover:to-black hover:shadow-lg transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
         >
-          <BsBoxFill className="text-base" />
+          <BsBoxFill className="text-lg" />
           Billing
         </button>
 
-        {/* Logout Button */}
+        {/* Logout Button with Tooltip */}
         <div className="relative group">
           <button
             onClick={handleLogout}
-            className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-r from-red-400 to-red-800 text-white shadow-md hover:from-red-500 hover:to-rose-600 hover:shadow-lg transition hover:-translate-y-0.5 active:translate-y-0"
+            className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-800 text-white shadow-md hover:from-red-600 hover:to-rose-600 hover:shadow-lg transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <FaPowerOff className="text-base" />
+            <FaPowerOff className="text-lg" />
           </button>
-          {/* Tooltip */}
-          <span className="absolute -top-9 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <span className="absolute -top-9 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
             Logout
           </span>
         </div>

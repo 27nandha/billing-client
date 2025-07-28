@@ -13,6 +13,7 @@ import Billing from "./components/Billing";
 import Invoices from "./components/Invoices";
 import Subcompany from "./components/Subcompany";
 import Quotations from "./components/Quotation";
+import BankDetail from "./components/BankDetail";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/subcompany" element={<Subcompany />} />
           <Route path="/quotation" element={<Quotations />} />
+          <Route path="/bankdetails" element={<BankDetail />} />
         </Route>
       </Routes>
     </>

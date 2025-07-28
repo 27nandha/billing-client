@@ -5,7 +5,8 @@ export const generateBillPdf = (
   bill,
   client,
   servicesList,
-  subcompany
+  subcompany,
+  bank
 ) => {
   const doc = new PDFDocument({ margin: 40 });
   doc.pipe(res);
@@ -149,21 +150,40 @@ export const generateBillPdf = (
   // === Terms & Conditions ===
   y += 40;
   doc.font("Helvetica-Bold").fontSize(9).text("Terms & Conditions:", 50, y);
+  const terms =
+    bill.type === "quotation"
+      ? [
+          "Quotation once made, cannot be modified or cancelled.",
+          "The Payment Terms: 100% in advance.",
+          "This Quotation is Valid for 5 Days Only.",
+          "Payment to be made in favor of Redback IT Solutions Pvt Ltd.",
+        ]
+      : [
+          "Goods once sold cannot be taken back or exchanged.",
+          "Once invoice is made, it cannot be modified or cancelled.",
+          "Warranty must be claimed from manufacturer only.",
+          "Physical damage / burnt components / mishandling voids warranty.",
+          "Inclusive of all taxes.",
+        ];
 
   doc
     .font("Helvetica")
     .fontSize(9)
-    .list(
-      [
-        "Goods once sold cannot be taken back or exchanged.",
-        "Once invoice is made, it cannot be modified or cancelled.",
-        "Warranty must be claimed from manufacturer only.",
-        "Physical damage / burnt components / mishandling voids warranty.",
-        "Inclusive of all taxes.",
-      ],
-      60,
-      y + 15
-    );
+    .list(terms, 60, y + 15);
+
+  // === Bank Details Section ===
+  y += 15 + terms.length * 15 + 10; // Adjust Y based on terms length
+
+  doc.font("Helvetica-Bold").fontSize(9).text("Bank Details:", 50, y);
+
+  doc
+    .font("Helvetica")
+    .fontSize(9)
+    .text(`Account Holder: ${bank?.accountHolder || "N/A"}`, 60, y + 15)
+    .text(`Account Number: ${bank?.accountNumber || "N/A"}`, 60, y + 30)
+    .text(`Bank Name: ${bank?.bankName || "N/A"}`, 60, y + 45)
+    .text(`Branch: ${bank?.branch || "N/A"}`, 60, y + 60)
+    .text(`IFSC Code: ${bank?.ifscCode || "N/A"}`, 60, y + 75);
 
   // === Signature Section ===
   doc

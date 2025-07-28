@@ -185,7 +185,7 @@ const Invoices = ({ type = "invoice" }) => {
                         <th className="p-3 border-b">Status</th>
                       )}
                       <th className="p-3 border-b">Total</th>
-                      <th className="p-3 border-b">PDF</th> {/* Add this */}
+                      <th className="p-3 border-b">PDF</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -3,6 +3,7 @@ import { generateBillPdf } from "../utils/generateBillPdf.js";
 import Service from "../models/serviceModel.js";
 import Client from "../models/clientModel.js";
 import InvoiceCounter from "../models/invoiceCounterModel.js";
+import Bank from "../models/bankModel.js";
 
 // Add Bill
 
@@ -199,9 +200,14 @@ export const downloadBillPdf = async (req, res) => {
 
     const client = bill.client;
     const subcompany = bill.subcompany;
+    const defaultBank = await Bank.findOne({ isDefault: true });
+
+    if (!defaultBank) {
+      return res.status(404).json({ message: "No default bank found" });
+    }
 
     const allServices = await Service.find({}); // fetch fresh data
-    generateBillPdf(res, bill, client, allServices, subcompany);
+    generateBillPdf(res, bill, client, allServices, subcompany, defaultBank);
   } catch (error) {
     console.error("Error generating PDF:", error); // This will show the real error
     res
