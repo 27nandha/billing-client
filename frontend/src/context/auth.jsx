@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false); // <-- Auth loaded
   }, []);
 
-  if (loading) return null; // <-- block app until auth is ready
+  if (loading) return <div>Loading...</div>; // <-- block app until auth is ready
 
   return (
     <AuthContext.Provider value={[auth, setAuth]}>
