@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { IoIosArrowDown } from "react-icons/io";
 import { RxGithubLogo } from "react-icons/rx";
 import { FaBuilding } from "react-icons/fa";
-import { TbCircleLetterRFilled } from "react-icons/tb";
+import { TbCircleLetterRFilled, TbCircleLetterBFilled } from "react-icons/tb";
 import {
   MdMenuOpen,
   MdCategory,
@@ -38,7 +38,7 @@ const Sidebar = () => {
 
       {/* Logo */}
       <div className="inline-flex items-center">
-        <TbCircleLetterRFilled
+        <TbCircleLetterBFilled
           className={`text-customPurple mt-1 text-red-700 text-3xl cursor-pointer ml-1 mr-3 duration-500 ${
             !open && "rotate-[360deg]"
           }`}
@@ -49,7 +49,7 @@ const Sidebar = () => {
             !open && "scale-0"
           }`}
         >
-          Redback
+          InvoSync
         </h1>
       </div>
 

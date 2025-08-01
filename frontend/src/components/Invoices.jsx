@@ -205,7 +205,7 @@ const Invoices = ({ type = "invoice" }) => {
                             {highlight(bill.client?.name, searchTerm)}
                           </td>
                           <td className="p-3">
-                            {bill.subcompany?.name || "Redback"}
+                            {bill.subcompany?.name || "InvoSync"}
                           </td>
                           <td className="p-3">
                             {new Date(bill.createdAt).toLocaleDateString()}

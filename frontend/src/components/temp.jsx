@@ -46,7 +46,7 @@ const Sidebar = () => {
         />
         {open && (
           <h1 className="text-gray-800 font-bold text-2xl tracking-wide">
-            Redback
+            InvoSync
           </h1>
         )}
       </div>
